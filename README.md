@@ -429,8 +429,9 @@ export default App;
   - 자식 컴포넌트는 props를 받아오기만 하고, 직접 수정하지 못함
 - state
   - 컴포넌트 내부에서 선언하며 내부에서 값을 변경
+#### props
 - props 예제
-  - 부모 컴포넌트인 App에서 속성 값을 지정하면, 자식 컴포넌트인 MyName이 받아와서 보여주는 형태
+  - App에서 속성 값을 지정하면, MyName이 받아와서 보여주는 형태
 ```javascript
 // MyName.js
 import React, { Component } from 'react';
@@ -463,7 +464,7 @@ class App extends Component {
 export default App;
 ```
 #### defaultProps
-- props를 빠뜨리거나, 일부러 비울 경우를 대비해 기본값을 자식 컴포넌트에서 설정 가능
+- props를 빠뜨리거나, 일부러 비울 경우를 대비해 기본값을 해당 컴포넌트에서 설정 가능
 ```javascript
 import React, { Component, Fragment } from 'react';
 import './App.css'
@@ -532,4 +533,249 @@ const MyName = ({ name }) => {
 };
 
 export default MyName;
+```
+#### state
+- Class Field 초기화에서 정의
+- 생성자에서도 정의 가능
+- 방법1: Class Field 초기화 
+```javascript
+import React, { Component } from 'react';
+
+class Counter extends Component {
+  state = {
+    number: 0
+  }
+
+  handleIncrease = () => {
+    this.setState({
+      number: this.state.number + 1
+    });
+  }
+
+  handleDecrease = () => {
+    this.setState({
+      number: this.state.number - 1
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>카운터</h1>
+        <div>값: {this.state.number}</div>
+        <button onClick={this.handleIncrease}>+</button>
+        <button onClick={this.handleDecrease}>-</button>
+      </div>
+    );
+  }
+}
+
+export default Counter;
+```
+- 방법2: 생성자에서의 정의
+  - constructor 에서 super(props)를 호출 한 이유는, 작성한 생성자가 기존의 생성자를 덮어쓰기 때문
+```javascript
+import React, { Component } from 'react';
+
+class Counter extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      number: 0
+    }
+  }
+
+  ... 
+}
+```
+- class field와 constructor를 동시에 사용하면, 설정되는 순서는?
+  - class field가 먼저 실행되고, constructor이 나중에 실행
+![field와 constructor 순서](./images/State_Set_Order.png)
+###### 메소드 작성
+- 방법1: 아래와 같은 형식으로 작성
+```javascript
+handleIncrease = () => {
+  this.setState({
+    number: this.state.number + 1
+  });
+}
+
+handleDecrease = () => {
+  this.setState({
+    number: this.state.number - 1
+  });
+}
+```
+- 방법2
+  - 나중에 버튼에서 클릭이벤트가 발생 했을 때, this가 undefined라서 제대로 처리 안됨
+  - 함수가 버튼의 클릭이벤트로 전달이 되는 과정에서 “this” 와의 연결이 끊겨버리기 때문
+  - constructor에서 함수를 바인드 시켜줘야 함
+```javascript
+handleIncrease() {
+  this.setState({
+    number: this.state.number + 1
+  });
+}
+
+handleDecrease() {
+  this.setState({
+    number: this.state.number - 1
+  });
+}
+```
+```javascript
+constructor(props) {
+  super(props);
+  this.handleIncrease = this.handleIncrease.bind(this);
+  this.handleDecrease = this.handleDecrease.bind(this);
+}
+```
+###### 화살표 함수
+- 익명 함수를 선언하여 변수에 대입하는 방법과 유사
+- 기존 함수 표현법
+```javascript
+function add(first, second){
+  return first + second;
+}
+
+var add = function(first, second){
+  return first + second;
+};
+```
+- 화살표 함수 표현법
+  - 익명 함수를 선언하여 변수에 대입하는 방법과 유사
+  - 기존 함수에서 사용하던 파라미터를, ``=>`` 다음 ``{}`` 안에는 return하고 싶은 내용을 적으면 됨
+```javascript
+let add = (first,second) => {    // () 안에 파라미터
+  return first + second;         // first 더하기 second 바환
+};
+let add = (first,second) => first + second;   //바로 반환
+let addAndMultiple = (first,second) => ({ add: first + second, multiply: first * second}); //  객체 반환
+```
+- '계단형 함수 선언'과 같은 구조가 만들어지지 않게 해 줄 수 있음
+```javascript
+function addNumber(num) {
+  return function (value) {
+    return num+value;
+  };
+}
+let addNumber = num => value => num + value;   
+```
+- 화살표 함수는 콜백 함수의 this범위로 생기는 오류를 피하기 위해 bind() 함수를 사용하여 this객체 전달하는 과정을 포함
+  - this.bind를 사용하지 않아도 됨
+```javascript
+class ABC {
+  constructor() {
+    let add1= function (first, second) {
+      return first + second;
+    }.bind(this)                                //bind를 해줬다
+    
+    let add2 = (first,second) => first+second;  //arrow는 편하게 쓰면 됨
+  }
+}
 ```  
+###### setState
+- state에 있는 값을 바꾸기 위해서는, this.setState를 무조건 사용
+- this.setState 함수가 호출되면 컴포넌트가 다시 Rendering됨
+- setState는, 객체로 전달되는 값만 업데이트
+- 예제 1
+  - state에 여러개의 값들이 있다고 가정
+  - ``this.setState({ number: 1 });``을 하게 되면, foo는 변경되지 않고, number 값만 업데이트 
+```javascript
+state = {
+  number: 0,
+  foo: 'bar'
+}
+```
+- 예제 2
+  - state의 깊이가 깊을 경우
+  - ``…`` 은 자바스크립트의 전개연산자. 기존의 객체안에 있는 내용을 해당 위치에다가 풀어준다는 의미
+  - 그 다음에, 설정하고 싶은 값을 또 넣어주면 해당 값을 덮어쓰게 됨
+  - 나중에 immutable.js 혹은 immer.js 를 사용하여 이 작업을 좀 더 간단하게 처리할 수 있음
+```javascript
+state = {
+  number: 0,
+  foo: {
+    bar: 0,
+    foobar: 1
+  }
+}
+```  
+```javascript
+this.setState({
+  number: 0,
+  foo: {
+    ...this.state.foo,
+    foobar: 2
+  }
+});
+```
+- setState에 객체 대신 함수를 전달하기
+  - setState를 사용하여 기존의 값을 참고하여 값을 업데이트를 하게 될 때 화살표 함수 사용 (좀 더 나은 문법)
+```javascript
+// 기존의 코드
+this.setState({
+  number: this.state.number + 1
+});
+// 새로운 코드 1
+this.setState(
+  (state) => ({
+    number: state.number + 1
+  })
+);
+// 새로운 코드 2. 비구조화 할당이라는 문법 사용
+this.setState(
+  ({ number }) => ({
+    number: number + 1
+  })
+);
+// 새로운 코드 3
+const { number } = this.state;
+this.setState({
+  number: number + 1
+})
+```
+- 기존의 코드를 아래와 같이 변경 가능
+```javascript
+handleIncrease = () => {
+  const { number } = this.state;
+  this.setState({
+    number: number + 1
+  });
+}
+
+handleDecrease = () => {
+  this.setState(
+    ({ number }) => ({
+      number: number - 1
+    })
+  );
+}
+```
+## 이벤트 설정
+```javascript
+render() {
+  return (
+    <div>
+      <h1>카운터</h1>
+      <div>값: {this.state.number}</div>
+      <button onClick={this.handleIncrease}>+</button>
+      <button onClick={this.handleDecrease}>-</button>
+    </div>
+  );
+}
+```
+- 기존의 Javascript 방식
+  - html에서 onclick 속성에 클릭되면 실행 할 자바스크립트를 문자열 형태로 넣어줌
+```javascript
+<button onclick="alert('hello');">Click Me</button>
+```
+- React 방식
+```javascript
+<button onClick={this.handleIncrease}>+</button>
+```
+- React에서 이벤트 함수를 설정할때 html과 다른 사항들
+  - 이벤트 이름을 설정 할 때 camelCase로 설정해주어야 함
+    - onclick 은 onClick, onmousedown은 onMouseDown, onchange는 onChange
+  - 이벤트에 전달해주는 값은 함수여야 함
+    - ``onClick={this.handleIncrease()}``처럼 하게 되면, 렌더링을 할 때 마다 해당 함수가 호출이 됨 
