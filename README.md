@@ -166,11 +166,11 @@ import registerServiceWorker from './registerServiceWorker';
 ReactDOM.render(<App />, document.getElementById('root'));
 registerServiceWorker();
 ```
-#### JSX
+## JSX
 - 얼핏 보기에는 html 같지만, 자바스크립트임
 - HTML 과 비슷한 문법으로 작성을 하면 이를 React.createElement를 사용하는 자바스크립트 형태로 변환
 ![변환 예](./images/HtmlToJavascript.png)
-###### JSX 규칙
+#### JSX 규칙
 - 태그는 꼭 닫혀있어야 함
   - ``<div>`` 태그를 열었으면, ``</div>`` 를 통하여 태그를 꼭 닫아주어야 함
 - 두개 이상의 엘리먼트는 무조건 하나의 엘리먼트로 감싸져야 함
@@ -217,7 +217,7 @@ class App extends Component {
 
 export default App;
 ```
-###### JSX안에 자바스크립트 값 사용하기
+#### JSX안에 자바스크립트 값 사용하기
 - JSX 내부에서 자바스크립트 값을 사용 할 땐 아래와 같이 사용
 ```javascript
 import React, { Component } from 'react';
@@ -235,7 +235,7 @@ class App extends Component {
 
 export default App;
 ```
-###### var, const, let
+#### var, const, let
 - const, let은 ES6에 도입된 키워드
 - var의 scope는 함수 단위이고, const와 let의 scope는 블록 단위
 - ES6에서는 var을 사용할 필요가 없음
@@ -260,7 +260,7 @@ function foo() {
   console.log(a); // hello
 }
 ```
-###### 조건부 렌더링
+#### 조건부 렌더링
 - 보통 삼항 연산자를 사용하거나, AND 연산자를 사용
 - if 문을 사용 할 수는 없고, 사용하려면 IIFE(즉시 실행 함수 표현) 을 사용해아 함
 - 삼항연산자
@@ -351,7 +351,7 @@ class App extends Component {
   }
 }
 ```
-###### style 과 className
+#### style 과 className
 - JSX 에서 style 과 CSS 클래스를 설정 할 때, 아래와 같은 형태로 작성
 - React에서는 객체 형태로 작성해주셔야 함
 ```javascript
@@ -403,7 +403,7 @@ class App extends Component {
 
 export default App;
 ```
-###### 주석
+#### 주석
 - ``{/* ... */}`` 사이에 넣거나, 태그 사이에 넣을 수도 있음
 ```javascript
 import React, { Component } from 'react';
@@ -423,3 +423,113 @@ class App extends Component {
 
 export default App;
 ```
+## props 와 state
+- props
+  - 부모 컴포넌트가 자식 컴포넌트에게 주는 값
+  - 자식 컴포넌트는 props를 받아오기만 하고, 직접 수정하지 못함
+- state
+  - 컴포넌트 내부에서 선언하며 내부에서 값을 변경
+- props 예제
+  - 부모 컴포넌트인 App에서 속성 값을 지정하면, 자식 컴포넌트인 MyName이 받아와서 보여주는 형태
+```javascript
+// MyName.js
+import React, { Component } from 'react';
+
+class MyName extends Component {
+  render() {
+    return (
+      <div>
+        안녕하세요! 제 이름은 <b>{this.props.name}</b> 입니다.
+      </div>
+    );
+  }
+}
+
+export default MyName;
+```
+```javascript
+// App.js
+import React, { Component } from 'react';
+import MyName from './MyName';
+
+class App extends Component {
+  render() {
+    return (
+      <MyName name="리액트" />
+    );
+  }
+}
+
+export default App;
+```
+#### defaultProps
+- props를 빠뜨리거나, 일부러 비울 경우를 대비해 기본값을 자식 컴포넌트에서 설정 가능
+```javascript
+import React, { Component, Fragment } from 'react';
+import './App.css'
+import MyName from './MyName';
+
+class App extends Component {
+  render() {
+    return (
+      <MyName />
+    );
+  }
+}
+
+export default App;
+```
+- 방법1:
+```javascript
+import React, { Component } from 'react';
+
+class MyName extends Component {
+  static defaultProps = {
+    name: '기본이름'
+  }
+  render() {
+    return (
+      <div>
+        안녕하세요! 제 이름은 <b>{this.props.name}</b> 입니다.
+      </div>
+    );
+  }
+}
+
+export default MyName;
+```
+- 방법2
+```javascript
+import React, { Component } from 'react';
+
+class MyName extends Component {
+  render() {
+    return (
+      <div>
+        안녕하세요! 제 이름은 <b>{this.props.name}</b> 입니다.
+      </div>
+    );
+  }
+}
+
+MyName.defaultProps = {
+  name: '기본이름'
+};
+
+export default MyName;
+```
+- 방법3
+  - 단순히 props만 받아와서 보여주기만 한다면 함수형 컴포넌트 형태로 표현 가능 
+```javascript
+import React from 'react';
+
+const MyName = ({ name }) => {
+  return (
+    <div>
+      안녕하세요! 제 이름은 {name} 입니다.
+    </div>
+  );
+};
+
+export default MyName;
+```  
