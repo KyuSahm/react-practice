@@ -1085,4 +1085,5 @@ class Sample extends Component {
     array: []
   }
 }
-```   
+```
+test   
